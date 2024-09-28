@@ -4,7 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-// use Illuminate\Support\Str;
+use App\Models\Blog;
 
 class BlogSeeder extends Seeder
 {
@@ -28,42 +28,36 @@ class BlogSeeder extends Seeder
         $blogs = [
             [
                 'title' => 'First Blog Post',
-
                 'description' => 'This is the first blog post description.',
                 'image' => $images[array_rand($images)],
                 'category' => 'Technology',
             ],
             [
                 'title' => 'Second Blog Post',
-
                 'description' => 'This is the second blog post description.',
                 'image' => $images[array_rand($images)],
                 'category' => 'Web Development',
             ],
             [
                 'title' => 'Third Blog Post',
-
                 'description' => 'This is the third blog post description.',
                 'image' => $images[array_rand($images)],
                 'category' => 'Backend Development',
             ],
             [
                 'title' => 'Fourth Blog Post',
-
                 'description' => 'This is the fourth blog post description.',
                 'image' => $images[array_rand($images)],
                 'category' => 'Frontend Development',
             ],
             [
                 'title' => 'Fifth Blog Post',
-
                 'description' => 'This is the fifth blog post description.',
                 'image' => $images[array_rand($images)],
                 'category' => 'Design',
             ],
             [
                 'title' => 'Sixth Blog Post',
-
                 'description' => 'This is the sixth blog post description.',
                 'image' => $images[array_rand($images)],
                 'category' => 'Business',
@@ -71,6 +65,11 @@ class BlogSeeder extends Seeder
         ];
 
         // Insert into the blogs table
+        foreach ($blogs as &$blog) {
+            // Generate a slug for each blog entry
+            $blog['slug'] = Blog::generateSlug();
+        }
+
         DB::table('blogs')->insert($blogs);
     }
 }
