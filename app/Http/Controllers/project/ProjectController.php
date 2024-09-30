@@ -11,7 +11,8 @@ class ProjectController extends Controller
     // Fetch all projects
     public function index()
     {
-        $projects = Project::all();
+        // Retrieve projects ordered by the most recently created
+        $projects = Project::orderBy('created_at', 'desc')->get();
     
         // Loop through each project and adjust the image path
         $projects->transform(function ($project) {
@@ -22,9 +23,11 @@ class ProjectController extends Controller
             return $project;
         });
     
+        // Return the sorted projects as a JSON response
         return response()->json($projects, 200);
     }
     
+
     // Fetch a single project by ID
     public function show($id)
     {
@@ -50,10 +53,13 @@ class ProjectController extends Controller
             'end_date' => 'nullable|string|max:255',
             'category' => 'nullable|string|max:255',
             'url' => 'nullable|string|max:255',
-            'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048', // Optional image validation
+            'image' => 'image|mimes:jpg,jpeg,png|max:2048', // Optional image validation
         ]);
 
         // Create a new project
+        $imageName = time() . '.' . $request->image->extension();
+        $request->image->move(public_path('project-images'), $imageName);
+
         $project = new Project();
         $project->name = $request->name;
         $project->description = $request->description;
@@ -63,12 +69,10 @@ class ProjectController extends Controller
         $project->end_date = $request->end_date;
         $project->category = $request->category;
         $project->url = $request->url;
+        $project->image = $imageName;
 
         // Handle image upload
-        if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('project-images', 'public');
-            $project->image = $imagePath;
-        }
+
 
         $project->save();
 
