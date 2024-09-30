@@ -20,7 +20,6 @@ class BlogSeeder extends Seeder
             '1718483175.jpg',
             '1718491950.jpg',
             '1718566073.jpg',
-            '1718566433.png',
             '1718577499.jpg',
             '1718566337.jpg',
         ];

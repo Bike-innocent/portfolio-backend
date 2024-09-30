@@ -11,7 +11,7 @@ use App\Http\Controllers\project\ProjectController;
 
 // Public routes
 Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login', [AuthController::class, 'login']);
+Route::post('/mylogin', [AuthController::class, 'login']);
 Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail']);
 Route::post('/reset-password', [ResetPasswordController::class, 'reset']);
 Route::get('/sanctum/csrf-cookie', [CsrfCookieController::class, 'show']);

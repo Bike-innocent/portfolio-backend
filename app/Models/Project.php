@@ -4,20 +4,27 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class Project extends Model
 {
     use HasFactory;
 
-    /**
-     * The attributes that aren't mass assignable.
-     *
-     * This will prevent mass assignment on all fields unless explicitly allowed.
-     */
+    // Allow mass assignment on all fields
     protected $guarded = [];
 
     /**
-     * Example of defining relationships, scopes, or accessors can go here.
-     * You can add custom methods to handle relationships or additional logic.
+     * Automatically generate a slug when a project is being created.
      */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($project) {
+            // If no slug is set, create a random 8-character slug
+            if (empty($project->slug)) {
+                $project->slug = Str::random(8);
+            }
+        });
+    }
 }

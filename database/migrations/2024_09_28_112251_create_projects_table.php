@@ -22,6 +22,7 @@ return new class extends Migration
             $table->date('end_date')->nullable();  // End date of the project (nullable)
             $table->string('category')->nullable();  // Category of the project (nullable)
             $table->string('url')->nullable();  // URL for live project view (nullable)
+            $table->string('slug')->unique();  // Unique slug for the project
             $table->timestamps();  // This will handle created_at and updated_at
         });
 

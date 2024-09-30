@@ -29,17 +29,24 @@ class ProjectController extends Controller
     
 
     // Fetch a single project by ID
-    public function show($id)
+    public function show($slug)
     {
-        $project = Project::find($id);
-
+        $project = Project::where('slug', $slug)->first();
+    
         if (!$project) {
             return response()->json(['message' => 'Project not found'], 404);
         }
 
+        if ($project->image) {
+            // Append the correct image directory path
+            $project->image = url('project-images/' . $project->image);
+        }
+
+       
+    
         return response()->json($project, 200);
     }
-
+    
     // Create a new project
     public function store(Request $request)
     {
