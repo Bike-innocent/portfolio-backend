@@ -28,7 +28,7 @@ class ProjectController extends Controller
     }
     
 
-    // Fetch a single project by ID
+    // Fetch a single project by SLUG
     public function show($slug)
     {
         $project = Project::where('slug', $slug)->first();
@@ -60,7 +60,7 @@ class ProjectController extends Controller
             'end_date' => 'nullable|string|max:255',
             'category' => 'nullable|string|max:255',
             'url' => 'nullable|string|max:255',
-            'image' => 'image|mimes:jpg,jpeg,png|max:2048', // Optional image validation
+            'image' => 'image|mimes:jpg,jpeg,png|max:5048', // Optional image validation
         ]);
 
         // Create a new project
@@ -86,53 +86,60 @@ class ProjectController extends Controller
         return response()->json($project, 201);
     }
 
-    // Update an existing project
-    public function update(Request $request, $id)
-    {
-        $project = Project::find($id);
+ 
 
-        if (!$project) {
-            return response()->json(['message' => 'Project not found'], 404);
-        }
+    public function update(Request $request, $slug)
+{
+  
+    $project = Project::where('slug', $slug)->first();
 
-        // Validation for all the fields
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'required|string',
-            'client' => 'nullable|string|max:255',
-            'tools' => 'nullable|string|max:255',
-            'start_date' => 'nullable|string|max:255',
-            'end_date' => 'nullable|string|max:255',
-            'category' => 'nullable|string|max:255',
-            'url' => 'nullable|string|max:255',
-            'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048', // Optional image validation
-        ]);
+    
 
-        // Update project fields
-        $project->name = $request->name;
-        $project->description = $request->description;
-        $project->client = $request->client;
-        $project->tools = $request->tools;
-        $project->start_date = $request->start_date;
-        $project->end_date = $request->end_date;
-        $project->category = $request->category;
-        $project->url = $request->url;
-
-        // Handle image upload
-        if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('project-images', 'public');
-            $project->image = $imagePath;
-        }
-
-        $project->save();
-
-        return response()->json($project, 200);
+    if (!$project) {
+        return response()->json(['message' => 'Project not found'], 404);
     }
 
+    // Validation
+    $request->validate([
+        'name' => 'required|string|max:255',
+        'description' => 'required|string',
+        'client' => 'nullable|string|max:255',
+        'tools' => 'nullable|string|max:255',
+        'start_date' => 'nullable|string|max:255',
+        'end_date' => 'nullable|string|max:255',
+        'category' => 'nullable|string|max:255',
+        'url' => 'nullable|string|max:255',
+        'image' => 'nullable|image|mimes:jpg,jpeg,png|max:5048',
+    ]);
+
+    // Update fields
+    $project->name = $request->name;
+    $project->description = $request->description;
+    $project->client = $request->client ?? $project->client;
+    $project->tools = $request->tools ?? $project->tools;
+    $project->start_date = $request->start_date ?? $project->start_date;
+    $project->end_date = $request->end_date ?? $project->end_date;
+    $project->category = $request->category ?? $project->category;
+    $project->url = $request->url ?? $project->url;
+
+    // Handle file upload if a new image is provided
+    if ($request->hasFile('image')) {
+        $imageName = time().'.'.$request->image->extension();
+        $request->image->move(public_path('project-images'), $imageName);
+        $project->image = $imageName;
+    }
+
+    // Save the updated project
+    $project->save();
+
+    return response()->json(['message' => 'Project updated successfully', 'project' => $project], 200);
+}
+
+
     // Delete a project
-    public function destroy($id)
+    public function destroy($slug)
     {
-        $project = Project::find($id);
+         $project = Project::where('slug', $slug)->first();
 
         if (!$project) {
             return response()->json(['message' => 'Project not found'], 404);
@@ -142,4 +149,34 @@ class ProjectController extends Controller
 
         return response()->json(['message' => 'Project deleted'], 200);
     }
+
+
+ 
+   
+
+    public function getRelatedProjects($slug)
+    {
+        // Find the current project by slug
+        $currentProject = Project::where('slug', $slug)->firstOrFail();
+    
+        // Fetch other projects excluding the current one
+        $relatedProjects = Project::where('id', '!=', $currentProject->id) // Exclude the current project
+            ->get();
+    
+        // If no related projects found, return an empty array or message
+        if ($relatedProjects->isEmpty()) {
+            return response()->json([], 200); // Return empty array for no related projects
+        }
+    
+        // Loop through related projects and append the correct image directory path
+        foreach ($relatedProjects as $project) {
+            if ($project->image) {
+                $project->image = url('project-images/' . $project->image);
+            }
+        }
+    
+        return response()->json($relatedProjects, 200);
+    }
+    
+
 }

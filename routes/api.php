@@ -19,7 +19,9 @@ Route::get('/sanctum/csrf-cookie', [CsrfCookieController::class, 'show']);
 
 Route::prefix('projects')->group(function () {
     Route::get('/', [ProjectController::class, 'index']);  
-    Route::get('/{id}', [ProjectController::class, 'show']);          
+    Route::get('/{slug}', [ProjectController::class, 'show']);  
+    Route::get('/{slug}/related', [ProjectController::class, 'getRelatedProjects']);
+        
 
 });
 
@@ -33,8 +35,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('projects')->group(function () {
    
         Route::post('/', [ProjectController::class, 'store']);         // Create a new project
-        Route::put('/{id}', [ProjectController::class, 'update']);     // Update a project by ID
-        Route::delete('/{id}', [ProjectController::class, 'destroy']); // Delete a project by ID
+        Route::put('/{slug}', [ProjectController::class, 'update']);     // Update a project by ID
+        Route::delete('/{slug}', [ProjectController::class, 'destroy']); // Delete a project by ID
     });
     
 });
