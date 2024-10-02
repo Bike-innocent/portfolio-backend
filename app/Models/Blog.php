@@ -10,21 +10,13 @@ class Blog extends Model
 {
     use HasFactory;
 
-    /**
-     * The attributes that aren't mass assignable.
-     *
-     * All attributes are mass assignable unless explicitly listed in the $guarded array.
-     */
     protected $guarded = [];
 
-    /**
-     * Automatically boot and generate a slug for the blog post.
-     */
     public static function boot()
     {
         parent::boot();
 
-        // Automatically generate a slug when creating a new blog post
+        // Automatically generate a random slug when creating a new blog post
         static::creating(function ($blog) {
             if (empty($blog->slug)) {
                 $blog->slug = self::generateSlug();
@@ -33,16 +25,19 @@ class Blog extends Model
     }
 
     /**
-     * Generate a unique slug of random text for the blog post.
-     * This slug can be used in URLs.
+     * Generate a unique 8-character slug.
      *
      * @return string
      */
     public static function generateSlug()
     {
-        // Generates a random 8-character slug
-        return Str::random(8);
-    }
+        $slug = Str::random(8);
 
-    // Additional methods or relationships can be added here
+        // Ensure the slug is unique by checking the database
+        while (self::where('slug', $slug)->exists()) {
+            $slug = Str::random(8);
+        }
+
+        return $slug;
+    }
 }
