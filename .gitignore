@@ -3,7 +3,8 @@
 /public/build
 /public/hot
 /public/avatars/
-/public/post-images/
+/public/blog-images/
+/public/project-images/
 /public/storage
 /storage/*.key
 /vendor
