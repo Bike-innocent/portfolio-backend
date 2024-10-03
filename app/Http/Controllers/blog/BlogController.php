@@ -116,17 +116,27 @@ class BlogController extends Controller
     // Fetch related blogs
     public function getRelatedBlogs($slug)
     {
+        // Find the current blog by slug
         $currentBlog = Blog::where('slug', $slug)->firstOrFail();
-        $relatedBlogs = Blog::where('id', '!=', $currentBlog->id)
-                            ->where('category', $currentBlog->category)
-                            ->get();
-
+    
+        // Fetch other blogs excluding the current one
+        $relatedBlogs = Blog::where('id', '!=', $currentBlog->id) // Exclude the current blog
+            ->get();
+    
+        // Check if no related blogs are found, return an empty array
+        if ($relatedBlogs->isEmpty()) {
+            return response()->json([], 200); // Return empty array
+        }
+    
+        // Loop through related blogs and append the correct image directory path
         foreach ($relatedBlogs as $blog) {
             if ($blog->image) {
                 $blog->image = url('blog-images/' . $blog->image);
             }
         }
-
+    
+        // Return the related blogs as JSON response
         return response()->json($relatedBlogs, 200);
     }
+    
 }
