@@ -8,7 +8,7 @@ use App\Http\Controllers\Blog\BlogController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Sanctum\Http\Controllers\CsrfCookieController;
 use App\Http\Controllers\Project\ProjectController;
-
+use App\Http\Controllers\Contact\ContactController;
 
 // Public routes
 Route::post('/register', [AuthController::class, 'register']);
@@ -31,6 +31,17 @@ Route::prefix('blogs')->group(function () {
     Route::get('/{slug}', [BlogController::class, 'show']);  // Fetch a single blog by slug
     Route::get('/{slug}/related', [BlogController::class, 'getRelatedBlogs']);  // Fetch related blogs
 });
+
+
+
+
+
+Route::post('/contact', [ContactController::class, 'sendContactMessage']);
+
+
+
+
+
 
 // Protected routes
 Route::middleware('auth:sanctum')->group(function () {
