@@ -49,7 +49,7 @@ class AuthController extends Controller
         $user = Auth::user();
         $token = $user->createToken('auth_token')->plainTextToken;
 
-        return response()->json(['access_token' => $token, 'token_type' => 'Bearer'], 200);
+         return response()->json(['user' => $user, 'access_token' => $token, 'token_type' => 'Bearer'], 201);
     }
 
     public function logout(Request $request)

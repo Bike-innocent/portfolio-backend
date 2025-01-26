@@ -88,5 +88,83 @@ class TemplateController extends Controller
 
         return response()->json($template, 200);
     }
+
+
+
+
+
+
+
+    public function update(Request $request, $slug)
+    {
+        // Find the template by slug
+        $template = Template::where('slug', $slug)->first();
+
+        if (!$template) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Template not found',
+            ], 404);
+        }
+
+        // Validate the incoming request data
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'required|string',
+            'price' => 'required|numeric|min:0',
+            'live_link' => 'nullable|url',
+            'category' => 'nullable|string|max:255',
+            'image' => 'image|mimes:jpg,jpeg,png|max:5048',
+            'technologies' => 'nullable|string',
+            'license' => 'nullable|string|max:255',
+            'status' => 'nullable|boolean',
+        ]);
+
+        // Handle image upload
+        if ($request->hasFile('image')) {
+            // Delete old image if exists
+            if ($template->image && file_exists(public_path('template-images/' . $template->image))) {
+                unlink(public_path('template-images/' . $template->image));
+            }
+
+            $imageName = time() . '.' . $request->image->extension();
+            $request->image->move(public_path('template-images'), $imageName);
+            $template->image = $imageName;
+        }
+
+        // Update template fields
+        $template->name = $request->name;
+        $template->description = $request->description;
+        $template->price = $request->price;
+        $template->live_link = $request->live_link;
+        $template->category = $request->category;
+        $template->technologies = $request->technologies;
+        $template->license = $request->license ?? 'Standard'; // Default value
+        $template->status = $request->status ?? false; // Default to false if not provided
+
+        $template->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Template updated successfully',
+            'template' => $template,
+        ], 200);
+    }
+
+
+    public function destroy($slug)
+    {
+        $template = Template::where('slug', $slug)->first();
+
+        if (!$template) {
+            return response()->json(['message' => 'template not found'], 404);
+        }
+
+        $template->delete();
+
+        return response()->json(['message' => 'template deleted'], 200);
+    }
+
+
 }
 
