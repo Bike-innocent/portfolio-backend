@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Route;
 use Laravel\Sanctum\Http\Controllers\CsrfCookieController;
 use App\Http\Controllers\Project\ProjectController;
 use App\Http\Controllers\Contact\ContactController;
+use App\Http\Controllers\Product\TemplateController;
 
 // Public routes
 Route::post('/register', [AuthController::class, 'register']);
@@ -31,6 +32,14 @@ Route::prefix('blogs')->group(function () {
     Route::get('/{slug}', [BlogController::class, 'show']);  // Fetch a single blog by slug
     Route::get('/{slug}/related', [BlogController::class, 'getRelatedBlogs']);  // Fetch related blogs
 });
+
+Route::prefix('templates')->group(function () {
+    Route::get('/', [TemplateController::class, 'index']);  // Fetch all blogs
+    Route::get('/{slug}', [TemplateController::class, 'show']);  // Fetch a single blog by slug
+    Route::get('/{slug}/related', [TemplateController::class, 'getRelatedBlogs']);  // Fetch related blogs
+});
+
+
 
 
 
@@ -62,4 +71,14 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/{slug}', [BlogController::class, 'update']);    // Update a blog by slug
         Route::delete('/{slug}', [BlogController::class, 'destroy']); // Delete a blog by slug
     });
+
+    Route::prefix('templates')->group(function () {
+        Route::post('/', [TemplateController::class, 'store']);          // Create a new blog
+        Route::put('/{slug}', [TemplateController::class, 'update']);    // Update a blog by slug
+        Route::delete('/{slug}', [TemplateController::class, 'destroy']); // Delete a blog by slug
+    });
+
 });
+
+
+

@@ -52,12 +52,12 @@ class AuthController extends Controller
         return response()->json(['access_token' => $token, 'token_type' => 'Bearer'], 200);
     }
 
-public function logout(Request $request)
-{
-    // Revoke all tokens for the user
-    $request->user('sanctum')->tokens()->delete();
-    // Logout the user from the web guard (session)
-    Auth::guard('web')->logout();
-    return response()->json(['message' => 'Logged out successfully'], 200);
-}
+    public function logout(Request $request)
+    {
+        // Revoke all tokens for the user
+        $request->user('sanctum')->tokens()->delete();
+        // Logout the user from the web guard (session)
+        Auth::guard('web')->logout();
+        return response()->json(['message' => 'Logged out successfully'], 200);
+    }
 }

@@ -19,6 +19,9 @@ class DatabaseSeeder extends Seeder
             AdminSeeder::class,
             ProjectSeeder::class,
             BlogSeeder::class,
+            TemplateSeeder::class,
+            TemplateReviewSeeder::class,
+            TemplateVersionSeeder::class,
 
 
         ]);

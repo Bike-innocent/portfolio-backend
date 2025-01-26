@@ -20,8 +20,8 @@ class AdminSeeder extends Seeder
         $adminRole = Role::firstOrCreate(['name' => 'admin']);
 
         // Find the user by their email
-         //$adminEmail = 'onyemaobichibuikeinnocent.com@gmail.com';
-         $adminEmail = 'admin@gmail.com';
+        //$adminEmail = 'onyemaobichibuikeinnocent.com@gmail.com';
+        $adminEmail = 'admin@gmail.com';
         $admin = User::where('email', $adminEmail)->first();
 
         if ($admin) {
