@@ -15,16 +15,17 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('template_id');
             $table->string('reviewer_name');
+            $table->string('reviewer_email');
             $table->integer('rating');
             $table->text('review_text')->nullable();
+            $table->string('token')->nullable();
+            $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
             $table->timestamps();
             $table->softDeletes();
-
-            // Foreign Key
             $table->foreign('template_id')->references('id')->on('templates')->onDelete('cascade');
         });
     }
-    
+
 
     /**
      * Reverse the migrations.

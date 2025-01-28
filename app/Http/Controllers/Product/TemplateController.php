@@ -37,7 +37,7 @@ class TemplateController extends Controller
             'category' => 'nullable|string|max:255',
             'image' => 'image|mimes:jpg,jpeg,png|max:5048',
             'technologies' => 'nullable|string',
-            
+
             'license' => 'nullable|string|max:255',
         ]);
 
@@ -72,7 +72,7 @@ class TemplateController extends Controller
     {
         $template = Template::where('slug', $slug)->first();
 
-        
+
 
         if (!$template) {
             return response()->json([
@@ -114,6 +114,7 @@ class TemplateController extends Controller
             'price' => 'required|numeric|min:0',
             'live_link' => 'nullable|url',
             'category' => 'nullable|string|max:255',
+            'downloads' => 'required|numeric',
             'image' => 'image|mimes:jpg,jpeg,png|max:5048',
             'technologies' => 'nullable|string',
             'license' => 'nullable|string|max:255',
@@ -138,6 +139,7 @@ class TemplateController extends Controller
         $template->price = $request->price;
         $template->live_link = $request->live_link;
         $template->category = $request->category;
+        $template->downloads = $request->downloads;
         $template->technologies = $request->technologies;
         $template->license = $request->license ?? 'Standard'; // Default value
         $template->status = $request->status ?? false; // Default to false if not provided
@@ -168,4 +170,3 @@ class TemplateController extends Controller
 
 }
 
- 
