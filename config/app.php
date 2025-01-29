@@ -17,7 +17,9 @@ return [
     */
 
     'name' => env('APP_NAME', 'PortFolio'),
-    'frontend_url' => env('FRONTEND_URL', 'https://buike.com.ng'),
+  
+    'frontend_url' => env('FRONTEND_URL', 'http://localhost:5173'),
+
 
     /*
     |--------------------------------------------------------------------------

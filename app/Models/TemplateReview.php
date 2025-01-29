@@ -16,6 +16,12 @@ class TemplateReview extends Model
      * @var array
      */
     protected $guarded = [];
+    protected $hidden = [
+        'reviewer_email',
+        'token',
+        
+
+    ];
 
     /**
      * Define the relationship with the Template model.

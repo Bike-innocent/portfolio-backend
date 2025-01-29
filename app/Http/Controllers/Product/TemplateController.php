@@ -70,24 +70,22 @@ class TemplateController extends Controller
      */
     public function show($slug)
     {
-        $template = Template::where('slug', $slug)->first();
-
-
-
+        $template = Template::with('reviews')->where('slug', $slug)->first();
+    
         if (!$template) {
             return response()->json([
                 'success' => false,
                 'message' => 'Template not found',
             ], 404);
         }
-
+    
         if ($template->image) {
             $template->image = url('template-images/' . $template->image);
         }
-
-
+    
         return response()->json($template, 200);
     }
+    
 
 
 
@@ -107,7 +105,7 @@ class TemplateController extends Controller
             ], 404);
         }
 
-        // Validate the incoming request data
+        // Validate the incoming request data ok inoo
         $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'required|string',
