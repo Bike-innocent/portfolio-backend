@@ -27,8 +27,8 @@ class TemplateVersionSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'template_id' => 2,
-                'version' => '2.1.0',
+                'template_id' => 1,
+                'version' => '2.0.0',
                 'release_date' => '2024-01-05',
                 'last_updated_date' => '2024-01-15',
                 'updates' => json_encode([

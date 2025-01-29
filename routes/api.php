@@ -11,6 +11,8 @@ use App\Http\Controllers\Project\ProjectController;
 use App\Http\Controllers\Contact\ContactController;
 use App\Http\Controllers\Product\TemplateController;
 use App\Http\Controllers\Product\ReviewController;
+use App\Http\Controllers\Product\VersionController;
+
 
 // Public routes
 Route::post('/register', [AuthController::class, 'register']);
@@ -88,7 +90,14 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/{id}', [ReviewController::class, 'destroy']);
     });
 
-    //hello
+  
+   
+
+    Route::post('/templates/{templateId}/versions', [VersionController::class, 'store']);
+    Route::put('/templates/{templateId}/versions/{versionId}', [VersionController::class, 'update']);
+    Route::delete('/templates/{templateId}/versions/{versionId}', [VersionController::class, 'destroy']);
+
+  
 
 
 });

@@ -70,7 +70,7 @@ class TemplateController extends Controller
      */
     public function show($slug)
     {
-        $template = Template::with('reviews')->where('slug', $slug)->first();
+        $template = Template::with(['reviews', 'versions'])->where('slug', $slug)->first();
     
         if (!$template) {
             return response()->json([

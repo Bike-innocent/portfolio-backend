@@ -20,8 +20,6 @@ return new class extends Migration
             $table->json('updates')->nullable(); // New column for version updates
             $table->timestamps();
             $table->softDeletes();
-
-            // Foreign Key
             $table->foreign('template_id')->references('id')->on('templates')->onDelete('cascade');
         });
     }
