@@ -12,6 +12,7 @@ use App\Http\Controllers\Contact\ContactController;
 use App\Http\Controllers\Product\TemplateController;
 use App\Http\Controllers\Product\ReviewController;
 use App\Http\Controllers\Product\VersionController;
+use App\Http\Controllers\Product\PaymentController;
 
 
 // Public routes
@@ -104,3 +105,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
 
+
+
+Route::post('/initialize-payment', [PaymentController::class, 'initializePayment']);
+
+Route::get('/paystack/callback', [PaymentController::class, 'verifyPayment'])->name('paystack.callback');
+
+Route::post('/free-download', [PaymentController::class, 'freeDownload']);
