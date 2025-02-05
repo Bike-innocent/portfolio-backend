@@ -87,6 +87,9 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     
+
+
+    
     Route::prefix('reviews')->group(function () {
         Route::delete('/{id}', [ReviewController::class, 'destroy']);
     });
@@ -112,3 +115,11 @@ Route::post('/initialize-payment', [PaymentController::class, 'initializePayment
 Route::get('/paystack/callback', [PaymentController::class, 'verifyPayment'])->name('paystack.callback');
 
 Route::post('/free-download', [PaymentController::class, 'freeDownload']);
+
+
+Route::post('/upload-template', [PaymentController::class, 'uploadTemplate']);
+
+
+
+
+// Route::get('/download/{template}', [PaymentController::class, 'downloadTemplate'])->name('download.template');

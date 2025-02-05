@@ -1,15 +1,17 @@
 <?php
 
+
+
 namespace App\Http\Controllers\Product;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Template;
-use Illuminate\Support\Facades\Http;
 use App\Models\TemplateUser;
 use App\Mail\TemplateDownloadMail;
 use Illuminate\Support\Facades\Mail;
-use Unicodeveloper\Paystack\Facades\Paystack; // ✅ Import Paystack
+use Unicodeveloper\Paystack\Facades\Paystack;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 
 class PaymentController extends Controller
@@ -27,7 +29,7 @@ class PaymentController extends Controller
             'email' => $request->email,
             'amount' => $template->price * 100, // Paystack expects amount in kobo
             'currency' => 'NGN',
-            'reference' => Paystack::genTranxRef(), // ✅ Uses Paystack correctly
+            'reference' => Paystack::genTranxRef(),
             'callback_url' => route('paystack.callback'),
             'metadata' => [
                 'template_id' => $template->id,
@@ -36,10 +38,9 @@ class PaymentController extends Controller
         ];
 
         return response()->json([
-            'authorization_url' => Paystack::getAuthorizationUrl($paymentData)->url // ✅ Uses Paystack correctly
+            'authorization_url' => Paystack::getAuthorizationUrl($paymentData)->url
         ]);
     }
-
 
 
 
@@ -48,58 +49,54 @@ class PaymentController extends Controller
     {
         $reference = $request->query('reference');
         $paymentDetails = Paystack::getPaymentData();
-    
+
         if ($paymentDetails['status'] === true) {
+            Log::info('Payment successful', $paymentDetails);
+
             $metadata = $paymentDetails['data']['metadata'];
-            $email = $metadata['email'];
-            $templateId = $metadata['template_id'];
-    
-            $template = Template::find($templateId);
-    
-            // ✅ Fetch private repo ZIP using GitHub API
-            $githubToken = env('GITHUB_PERSONAL_ACCESS_TOKEN');
-            $repoOwner = "Bike-innocent";
-            $repoName = "portfolio"; // Replace with your private repo name
-    
-            $headers = [
-                'Authorization' => "token $githubToken",
-                'Accept' => 'application/vnd.github.v3+json'
-            ];
+            $email = $metadata['email'] ?? null;
+            $templateId = $metadata['template_id'] ?? null;
 
-            $apiUrl = "https://api.github.com/repos/$repoOwner/$repoName/tarball"; 
+            Log::info("Extracted metadata - Email: {$email}, Template ID: {$templateId}");
 
-            try {
-                $response = Http::withHeaders($headers)->get($apiUrl);
-    
-                if ($response->successful()) {
-                    $downloadLink = $apiUrl; // ✅ Authenticated link
-                } else {
-                    Log::error("GitHub API Error: " . $response->body());
-                    return redirect("http://localhost:5173/payment-failed?message=Error generating download link. Contact support.");
-                }
-            } catch (\Exception $e) {
-                Log::error("GitHub API Exception: " . $e->getMessage());
-                return redirect("http://localhost:5173/payment-failed?message=Internal Server Error. Contact support.");
+            if (!$email || !$templateId) {
+                Log::error("Missing metadata in payment response");
+                return redirect("http://localhost:5173/payment-failed?message=Missing payment metadata.");
             }
-    
-            // ✅ Store user purchase
-            $existingPurchase = TemplateUser::where('email', $email)->where('template_id', $template->id)->exists();
-            if (!$existingPurchase) {
+
+            $template = Template::find($templateId);
+            if (!$template) {
+                Log::error("Template not found for ID: {$templateId}");
+                return redirect("http://localhost:5173/payment-failed?message=Template not found.");
+            }
+
+            $filePath = "templates/{$template->file_path}";
+
+            if (!Storage::exists($filePath)) {
+                Log::error("File does not exist: {$filePath}");
+                return redirect("http://localhost:5173/payment-failed?message=File not found.");
+            }
+
+            $downloadLink = route('download.template', [
+                'template' => $template->file_path,
+                'expires' => now()->addMinutes(1000)->timestamp,
+                'signature' => hash_hmac('sha256', $template->file_path, env('APP_KEY'))
+            ]);
+
+            if (!TemplateUser::where('email', $email)->where('template_id', $template->id)->exists()) {
                 TemplateUser::create(['email' => $email, 'template_id' => $template->id]);
                 $template->increment('downloads');
             }
-    
-            // ✅ Send email with secure download link
+
+            Log::info("Sending email to: {$email} with link: {$downloadLink}");
             Mail::to($email)->send(new TemplateDownloadMail($downloadLink, true));
-    
+
             return redirect("http://localhost:5173/payment-success?message=Payment successful! Check your email for the download link.");
         }
-    
+
+        Log::error("Payment failed", $paymentDetails);
         return redirect("http://localhost:5173/payment-failed?message=Payment failed! Try again.");
     }
-    
-
-
 
     public function freeDownload(Request $request)
     {
@@ -109,36 +106,81 @@ class PaymentController extends Controller
         ]);
 
         $template = Template::find($request->template_id);
+        $filePath = "templates/{$template->file_path}";
 
-        // Check if user already downloaded this template
-        $existingDownload = TemplateUser::where('email', $request->email)
-            ->where('template_id', $template->id)
-            ->exists();
-
-        if (!$existingDownload) {
-            // Store user email in template_users table
-            TemplateUser::create([
-                'email' => $request->email,
-                'template_id' => $template->id
+        if (Storage::exists($filePath)) {
+            $downloadLink = route('download.template', [
+                'template' => $template->file_path,
+                'expires' => now()->addMinutes(1000)->timestamp,
+                'signature' => hash_hmac('sha256', $template->file_path, env('APP_KEY'))
             ]);
 
-            // Increment download count in templates table
-            $template->increment('downloads');
+            if (!TemplateUser::where('email', $request->email)->where('template_id', $template->id)->exists()) {
+                TemplateUser::create(['email' => $request->email, 'template_id' => $template->id]);
+                $template->increment('downloads');
+            }
+
+            Mail::to($request->email)->send(new TemplateDownloadMail($downloadLink, false));
         }
-
-        // Generate download link
-
-        $downloadLink = "https://github.com/Bike-innocent/portfolio-backend/archive/refs/heads/main.zip"; // Replace with your actual repo link
-
-        // Send Email
-
-
-        // ✅ Send email for free template
-        Mail::to($request->email)->send(new TemplateDownloadMail($downloadLink, false));
 
         return response()->json([
             'redirect_url' => "http://localhost:5173/successful?message=Check your email for the download link."
         ]);
+    }
+
+
+    
+
+    public function uploadTemplate(Request $request)
+    {
+        $request->validate([
+            'template_id' => 'required|exists:templates,id',
+            'file' => 'required|mimes:zip|max:20480' // Accepts only zip files (Max: 20MB)
+        ]);
+
+        $template = Template::findOrFail($request->template_id);
+
+        // Store file in storage/app/templates
+        $file = $request->file('file');
+        $fileName = $file->getClientOriginalName();
+        $path = $file->storeAs('templates', $fileName);
+
+        // Check if file is successfully stored
+        if (!Storage::exists($path)) {
+            return response()->json(['error' => 'File upload failed'], 500);
+        }
+
+        // Save only the filename in the database
+        $template->update(['file_path' => $fileName]);
+
+        return response()->json([
+            'message' => 'Template uploaded successfully!',
+            'file_path' => $fileName
+        ]);
+    }
+
+
+
+
+
+
+    public function downloadTemplate(Request $request, $template)
+    {
+        $expectedSignature = hash_hmac('sha256', $template, env('APP_KEY'));
+
+        if ($request->query('signature') !== $expectedSignature || now()->timestamp > $request->query('expires')) {
+            abort(403, "Unauthorized Access");
+        }
+
+        // Use Laravel Storage helper
+        $filePath = "templates/{$template}";
+
+        if (!Storage::exists($filePath)) {
+            return response()->json(['error' => 'File Not Found'], 404);
+        }
+
+        // return Storage::download($filePath);
+        return response()->download(storage_path("app/{$filePath}"));
     }
 }
 
@@ -152,6 +194,24 @@ class PaymentController extends Controller
 
 
 
+
+
+    // public function downloadTemplate(Request $request, $template)
+    // {
+    //     $expectedSignature = hash_hmac('sha256', $template, env('APP_KEY'));
+
+    //     if ($request->query('signature') !== $expectedSignature || now()->timestamp > $request->query('expires')) {
+    //         abort(403, "Unauthorized Access");
+    //     }
+
+    //     $file = storage_path("app/templates/{$template}");
+
+    //     if (!file_exists($file)) {
+    //         abort(404, "File Not Found");
+    //     }
+
+    //     return response()->download($file);
+    // }
 
 
 
@@ -168,20 +228,22 @@ class PaymentController extends Controller
     //         $templateId = $metadata['template_id'];
 
     //         $template = Template::find($templateId);
-    //         $downloadLink = "https://github.com/Bike-innocent/portfolio/archive/refs/heads/main.zip"; // Replace with your actual repo link
+    //         $filePath = "templates/{$template->file_path}";
 
+    //         if (Storage::exists($filePath)) {
+    //             $downloadLink = route('download.template', [
+    //                 'template' => $template->file_path,
+    //                 'expires' => now()->addMinutes(10)->timestamp,
+    //                 'signature' => hash_hmac('sha256', $template->file_path, env('APP_KEY'))
+    //             ]);
 
-    //         // ✅ Store user if not already purchased
-    //         $existingPurchase = TemplateUser::where('email', $email)->where('template_id', $template->id)->exists();
-    //         if (!$existingPurchase) {
-    //             TemplateUser::create(['email' => $email, 'template_id' => $template->id]);
-    //             $template->increment('downloads');
+    //             if (!TemplateUser::where('email', $email)->where('template_id', $template->id)->exists()) {
+    //                 TemplateUser::create(['email' => $email, 'template_id' => $template->id]);
+    //                 $template->increment('downloads');
+    //             }
+
+    //             Mail::to($email)->send(new TemplateDownloadMail($downloadLink, true));
     //         }
-
-
-    //         Mail::to($email)->send(new TemplateDownloadMail($downloadLink, true));
-
-
 
     //         return redirect("http://localhost:5173/payment-success?message=Payment successful! Check your email for the download link.");
     //     }
