@@ -61,20 +61,20 @@ class PaymentController extends Controller
 
             if (!$email || !$templateId) {
                 Log::error("Missing metadata in payment response");
-                return redirect("http://localhost:5173/payment-failed?message=Missing payment metadata.");
+                return redirect("https://chibuikeinnocent.tech/payment-failed?message=Missing payment metadata.");
             }
 
             $template = Template::find($templateId);
             if (!$template) {
                 Log::error("Template not found for ID: {$templateId}");
-                return redirect("http://localhost:5173/payment-failed?message=Template not found.");
+                return redirect("https://chibuikeinnocent.tech/payment-failed?message=Template not found.");
             }
 
             $filePath = "templates/{$template->file_path}";
 
             if (!Storage::exists($filePath)) {
                 Log::error("File does not exist: {$filePath}");
-                return redirect("http://localhost:5173/payment-failed?message=File not found.");
+                return redirect("https://chibuikeinnocent.tech/payment-failed?message=File not found.");
             }
 
             $downloadLink = route('download.template', [
@@ -91,11 +91,11 @@ class PaymentController extends Controller
             Log::info("Sending email to: {$email} with link: {$downloadLink}");
             Mail::to($email)->send(new TemplateDownloadMail($downloadLink, true));
 
-            return redirect("http://localhost:5173/payment-success?message=Payment successful! Check your email for the download link.");
+            return redirect("https://chibuikeinnocent.tech/payment-success?message=Payment successful! Check your email for the download link.");
         }
 
         Log::error("Payment failed", $paymentDetails);
-        return redirect("http://localhost:5173/payment-failed?message=Payment failed! Try again.");
+        return redirect("https://chibuikeinnocent.tech/payment-failed?message=Payment failed! Try again.");
     }
 
     public function freeDownload(Request $request)
@@ -124,7 +124,7 @@ class PaymentController extends Controller
         }
 
         return response()->json([
-            'redirect_url' => "http://localhost:5173/successful?message=Check your email for the download link."
+            'redirect_url' => "https://chibuikeinnocent.tech/successful?message=Check your email for the download link."
         ]);
     }
 
@@ -195,58 +195,3 @@ class PaymentController extends Controller
 
 
 
-
-    // public function downloadTemplate(Request $request, $template)
-    // {
-    //     $expectedSignature = hash_hmac('sha256', $template, env('APP_KEY'));
-
-    //     if ($request->query('signature') !== $expectedSignature || now()->timestamp > $request->query('expires')) {
-    //         abort(403, "Unauthorized Access");
-    //     }
-
-    //     $file = storage_path("app/templates/{$template}");
-
-    //     if (!file_exists($file)) {
-    //         abort(404, "File Not Found");
-    //     }
-
-    //     return response()->download($file);
-    // }
-
-
-
-
-
-    // public function verifyPayment(Request $request)
-    // {
-    //     $reference = $request->query('reference');
-    //     $paymentDetails = Paystack::getPaymentData();
-
-    //     if ($paymentDetails['status'] === true) {
-    //         $metadata = $paymentDetails['data']['metadata'];
-    //         $email = $metadata['email'];
-    //         $templateId = $metadata['template_id'];
-
-    //         $template = Template::find($templateId);
-    //         $filePath = "templates/{$template->file_path}";
-
-    //         if (Storage::exists($filePath)) {
-    //             $downloadLink = route('download.template', [
-    //                 'template' => $template->file_path,
-    //                 'expires' => now()->addMinutes(10)->timestamp,
-    //                 'signature' => hash_hmac('sha256', $template->file_path, env('APP_KEY'))
-    //             ]);
-
-    //             if (!TemplateUser::where('email', $email)->where('template_id', $template->id)->exists()) {
-    //                 TemplateUser::create(['email' => $email, 'template_id' => $template->id]);
-    //                 $template->increment('downloads');
-    //             }
-
-    //             Mail::to($email)->send(new TemplateDownloadMail($downloadLink, true));
-    //         }
-
-    //         return redirect("http://localhost:5173/payment-success?message=Payment successful! Check your email for the download link.");
-    //     }
-
-    //     return redirect("http://localhost:5173/payment-failed?message=Payment failed! Try again.");
-    // }
