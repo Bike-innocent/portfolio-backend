@@ -112,7 +112,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
 Route::post('/initialize-payment', [PaymentController::class, 'initializePayment']);
 
-Route::get('/paystack/callback', [PaymentController::class, 'verifyPayment'])->name('paystack.callback');
+// Route::get('/paystack/callback', [PaymentController::class, 'verifyPayment'])->name('paystack.callback');
 
 Route::post('/free-download', [PaymentController::class, 'freeDownload']);
 
