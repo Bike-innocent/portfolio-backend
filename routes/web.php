@@ -23,4 +23,4 @@ Route::get('/reviews/delete/{token}', [ReviewController::class, 'delete'])->name
 
 Route::get('/download/{template}', [PaymentController::class, 'downloadTemplate'])->name('download.template');
 
-Route::get('/paystack/callback', [PaymentController::class, 'verifyPayment'])->name('paystack.callback');
+// Route::get('/paystack/callback', [PaymentController::class, 'verifyPayment'])->name('paystack.callback');
