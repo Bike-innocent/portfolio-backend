@@ -166,8 +166,8 @@ return [
         /*
          * Application Service Providers...
          */
-        Unicodeveloper\Paystack\PaystackServiceProvider::class,
-        Unicodeveloper\Paystack\PaystackServiceProvider::class,
+     
+        // Unicodeveloper\Paystack\PaystackServiceProvider::class,
         App\Providers\AppServiceProvider::class,
         App\Providers\AuthServiceProvider::class,
         // App\Providers\BroadcastServiceProvider::class,
@@ -190,7 +190,7 @@ return [
     */
 
     'aliases' => Facade::defaultAliases()->merge([
-        'Paystack' => Unicodeveloper\Paystack\Facades\Paystack::class,
+        // 'Paystack' => Unicodeveloper\Paystack\Facades\Paystack::class,
         // 'Example' => App\Facades\Example::class,
        // 'Socialite' => Laravel\Socialite\Facades\Socialite::class,
     ])->toArray(),
