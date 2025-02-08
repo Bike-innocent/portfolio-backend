@@ -167,12 +167,14 @@ return [
          * Application Service Providers...
          */
         Unicodeveloper\Paystack\PaystackServiceProvider::class,
+        Unicodeveloper\Paystack\PaystackServiceProvider::class,
         App\Providers\AppServiceProvider::class,
         App\Providers\AuthServiceProvider::class,
         // App\Providers\BroadcastServiceProvider::class,
        // Laravel\Socialite\SocialiteServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
+        
 
     ])->toArray(),
 
