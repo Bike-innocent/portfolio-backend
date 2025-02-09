@@ -131,40 +131,90 @@ class PaymentController extends Controller
 
     
 
+    // public function uploadTemplate(Request $request)
+    // {
+    //     $request->validate([
+    //         'template_id' => 'required|exists:templates,id',
+    //         'file' => 'required|mimes:zip|max:200480' // Accepts only zip files (Max: 20MB)
+    //     ]);
+
+    //     $template = Template::findOrFail($request->template_id);
+
+    //     // Store file in storage/app/templates
+    //     $file = $request->file('file');
+    //     $fileName = $file->getClientOriginalName();
+    //     $path = $file->storeAs('templates', $fileName);
+
+    //     // Check if file is successfully stored
+    //     if (!Storage::exists($path)) {
+    //         return response()->json(['error' => 'File upload failed'], 500);
+    //     }
+
+    //     // Save only the filename in the database
+    //     $template->update(['file_path' => $fileName]);
+
+    //     return response()->json([
+    //         'message' => 'Template uploaded successfully!',
+    //         'file_path' => $fileName
+    //     ]);
+    // }
+
+
     public function uploadTemplate(Request $request)
     {
-        $request->validate([
-            'template_id' => 'required|exists:templates,id',
-            'file' => 'required|mimes:zip|max:200480' // Accepts only zip files (Max: 20MB)
-        ]);
-
-        $template = Template::findOrFail($request->template_id);
-
-        // Store file in storage/app/templates
-        $file = $request->file('file');
-        $fileName = $file->getClientOriginalName();
-        $path = $file->storeAs('templates', $fileName);
-
-        Log::info('Upload started.');
-        Log::info($request->all());
-
-
-        // Check if file is successfully stored
-        if (!Storage::exists($path)) {
-            return response()->json(['error' => 'File upload failed'], 500);
+        try {
+            Log::info('Starting template upload process.');
+    
+            $request->validate([
+                'template_id' => 'required|exists:templates,id',
+                'file' => 'required|mimes:zip|max:200480' // Accepts only zip files (Max: 20MB)
+            ]);
+    
+            Log::info('Validation passed.', [
+                'template_id' => $request->template_id,
+                'file_name' => $request->file('file')->getClientOriginalName()
+            ]);
+    
+            $template = Template::findOrFail($request->template_id);
+    
+            $file = $request->file('file');
+            $fileName = time() . '_' . $file->getClientOriginalName(); // Adding timestamp to avoid conflicts
+            $path = $file->storeAs('templates', $fileName);
+    
+            Log::info('File attempted to be stored.', [
+                'path' => $path
+            ]);
+    
+            // Check if file is successfully stored
+            if (!Storage::exists($path)) {
+                Log::error('File upload failed. File does not exist in storage.', [
+                    'path' => $path
+                ]);
+                return response()->json(['error' => 'File upload failed'], 500);
+            }
+    
+            // Save only the filename in the database
+            $template->update(['file_path' => $fileName]);
+    
+            Log::info('Template updated successfully in the database.', [
+                'template_id' => $template->id,
+                'file_path' => $fileName
+            ]);
+    
+            return response()->json([
+                'message' => 'Template uploaded successfully!',
+                'file_path' => $fileName
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Exception occurred during template upload.', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+    
+            return response()->json(['error' => 'An unexpected error occurred.'], 500);
         }
-
-        // Save only the filename in the database
-        $template->update(['file_path' => $fileName]);
-
-        return response()->json([
-            'message' => 'Template uploaded successfully!',
-            'file_path' => $fileName
-        ]);
     }
-
-
-
+    
 
 
 
