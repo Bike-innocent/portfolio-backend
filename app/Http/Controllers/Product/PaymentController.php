@@ -135,7 +135,7 @@ class PaymentController extends Controller
     {
         $request->validate([
             'template_id' => 'required|exists:templates,id',
-            'file' => 'required|mimes:zip|max:20480' // Accepts only zip files (Max: 20MB)
+            'file' => 'required|mimes:zip|max:200480' // Accepts only zip files (Max: 20MB)
         ]);
 
         $template = Template::findOrFail($request->template_id);
@@ -144,6 +144,10 @@ class PaymentController extends Controller
         $file = $request->file('file');
         $fileName = $file->getClientOriginalName();
         $path = $file->storeAs('templates', $fileName);
+
+        Log::info('Upload started.');
+        Log::info($request->all());
+
 
         // Check if file is successfully stored
         if (!Storage::exists($path)) {
