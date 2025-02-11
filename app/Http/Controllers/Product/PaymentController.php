@@ -138,7 +138,10 @@ class PaymentController extends Controller
 
             $request->validate([
                 'template_id' => 'required|exists:templates,id',
-                'file' => 'required|mimes:zip|max:200480' // Accepts only zip files (Max: 20MB)
+
+
+
+                'file' => 'required|file|mimes:jpg,zip,jpeg,png,pdf|max:2048', // Accepts only zip files (Max: 20MB)
             ]);
 
             Log::info('Validation passed.', [
