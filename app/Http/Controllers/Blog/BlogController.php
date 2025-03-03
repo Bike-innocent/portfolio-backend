@@ -140,3 +140,4 @@ class BlogController extends Controller
     }
 
 }
+ 

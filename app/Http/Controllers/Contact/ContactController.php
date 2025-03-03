@@ -30,7 +30,7 @@
 //                 ->setBody(null, 'text/plain') // Set the type to plain text
 //                 ->text('You have received a new message from ' . $validated['email'] . ' with the message: ' . $validated['message']);
 //         });
-        
+
 
 //         return response()->json(['message' => 'Message sent successfully!'], 200);
 //     }
