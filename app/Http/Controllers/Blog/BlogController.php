@@ -40,33 +40,82 @@ class BlogController extends Controller
         return response()->json($blog, 200);
     }
 
-    // Create a new blog
+
+
+
+
+
+
+
+
+
+
+    // // Create a new blog
+    // public function store(Request $request)
+    // {
+    //     $request->validate([
+    //         'title' => 'required|string|max:255',
+    //         'description' => 'required|string',
+    //         'category' => 'nullable|string|max:255',
+    //         'image' => 'image|mimes:jpg,jpeg,png|max:5048',
+    //     ]);
+
+    //     $imageName = null;
+    //     if ($request->hasFile('image')) {
+    //         $imageName = time() . '.' . $request->image->extension();
+    //         $request->image->move(public_path('blog-images'), $imageName);
+    //     }
+
+    //     // Automatically generate a random 8-character slug
+    //     $blog = new Blog();
+    //     $blog->title = $request->title;
+    //     $blog->slug = Blog::generateSlug($blog->title);  // Using the random slug generator from the model
+    //     $blog->description = $request->description;
+    //     $blog->category = $request->category;
+    //     $blog->image = $imageName;
+    //     $blog->save();
+
+    //     return response()->json($blog, 201);
+    // }
+
+
+
     public function store(Request $request)
-    {
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'required|string',
-            'category' => 'nullable|string|max:255',
-            'image' => 'image|mimes:jpg,jpeg,png|max:5048',
-        ]);
+{
+    $request->validate([
+        'title' => 'required|string|max:255',
+        'description' => 'required|string',
+        'category' => 'nullable|string|max:255',
+        'image' => 'image|mimes:jpg,jpeg,png|max:5048',
+    ]);
 
-        $imageName = null;
-        if ($request->hasFile('image')) {
-            $imageName = time() . '.' . $request->image->extension();
-            $request->image->move(public_path('blog-images'), $imageName);
-        }
-
-        // Automatically generate a random 8-character slug
-        $blog = new Blog();
-        $blog->title = $request->title;
-        $blog->slug = Blog::generateSlug();  // Using the random slug generator from the model
-        $blog->description = $request->description;
-        $blog->category = $request->category;
-        $blog->image = $imageName;
-        $blog->save();
-
-        return response()->json($blog, 201);
+    $imageName = null;
+    if ($request->hasFile('image')) {
+        $imageName = time() . '.' . $request->image->extension();
+        $request->image->move(public_path('blog-images'), $imageName);
     }
+
+    // Generate slug from title
+    $slug = Blog::generateSlug($request->title);
+
+    $blog = new Blog();
+    $blog->title = $request->title;
+    $blog->slug = $slug; // Use the title-based slug
+    $blog->description = $request->description;
+    $blog->category = $request->category;
+    $blog->image = $imageName;
+    $blog->save();
+
+    return response()->json($blog, 201);
+}
+
+
+
+
+
+
+
+
 
     // Update an existing blog
     public function update(Request $request, $slug)
@@ -140,4 +189,86 @@ class BlogController extends Controller
     }
 
 }
- 
+
+
+
+
+
+// ok i have a laravel slug logic like this for my blog  public static function generateSlug()
+// <?php
+
+// namespace App\Models;
+
+// use Illuminate\Database\Eloquent\Factories\HasFactory;
+// use Illuminate\Database\Eloquent\Model;
+// use Illuminate\Support\Str;
+
+// class Blog extends Model
+// {
+//     use HasFactory;
+
+//     protected $guarded = [];
+
+//     public static function boot()
+//     {
+//         parent::boot();
+
+//         // Automatically generate a random slug when creating a new blog post
+//         static::creating(function ($blog) {
+//             if (empty($blog->slug)) {
+//                 $blog->slug = self::generateSlug();
+//             }
+//         });
+//     }
+
+//     /**
+//      * Generate a unique 8-character slug.
+//      *
+//      * @return string
+//      */
+//     public static function generateSlug()
+//     {
+//         $slug = Str::random(8);
+
+//         // Ensure the slug is unique by checking the database
+//         while (self::where('slug', $slug)->exists()) {
+//             $slug = Str::random(8);
+//         }
+
+//         return $slug;
+//     }
+// }
+// but i want the slug to be changed from random to the blog title but will be in slug format for url  here is table  Schema::create('blogs', function (Blueprint $table) {
+//             $table->id();
+//             $table->string('title');
+//             $table->string('slug')->unique();  // Unique slug for SEO-friendly URLs
+//             $table->text('description');
+//             $table->string('image');  // This will store the image path
+//             $table->string('category')->nullable();  // Category of the blog (nullable)
+//             $table->timestamps();  // Handles created_at and updated_at
+//         });  and here is the store method public function store(Request $request)
+//     {
+//         $request->validate([
+//             'title' => 'required|string|max:255',
+//             'description' => 'required|string',
+//             'category' => 'nullable|string|max:255',
+//             'image' => 'image|mimes:jpg,jpeg,png|max:5048',
+//         ]);
+
+//         $imageName = null;
+//         if ($request->hasFile('image')) {
+//             $imageName = time() . '.' . $request->image->extension();
+//             $request->image->move(public_path('blog-images'), $imageName);
+//         }
+
+//         // Automatically generate a random 8-character slug
+//         $blog = new Blog();
+//         $blog->title = $request->title;
+//         $blog->slug = Blog::generateSlug();  // Using the random slug generator from the model
+//         $blog->description = $request->description;
+//         $blog->category = $request->category;
+//         $blog->image = $imageName;
+//         $blog->save();
+
+//         return response()->json($blog, 201);
+//     }  maybe you will aplly the logic directly
