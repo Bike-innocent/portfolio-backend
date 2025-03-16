@@ -78,6 +78,7 @@ class BlogController extends Controller
     //     return response()->json($blog, 201);
     // }
 
+    //updated the blog slug
 
 
     public function store(Request $request)
