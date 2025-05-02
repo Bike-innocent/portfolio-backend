@@ -1,4 +1,3 @@
-# Dockerfile
 FROM php:8.2-apache
 
 # Install system dependencies
@@ -18,12 +17,21 @@ WORKDIR /var/www/html
 # Copy project files
 COPY . .
 
+# Change DocumentRoot to Laravel's public directory
+RUN sed -i 's|/var/www/html|/var/www/html/public|g' /etc/apache2/sites-available/000-default.conf
+
 # Set permissions
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html/storage
+
+    RUN touch /var/www/html/database/database.sqlite \
+    && chown -R www-data:www-data /var/www/html/database/database.sqlite
+
 
 # Expose port 80
 EXPOSE 80
 
 # Start Apache
 CMD ["apache2-foreground"]
+
+
