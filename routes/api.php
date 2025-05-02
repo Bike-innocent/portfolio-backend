@@ -9,10 +9,10 @@ use Illuminate\Support\Facades\Route;
 use Laravel\Sanctum\Http\Controllers\CsrfCookieController;
 use App\Http\Controllers\Project\ProjectController;
 use App\Http\Controllers\Contact\ContactController;
-use App\Http\Controllers\Product\TemplateController;
+// use App\Http\Controllers\Product\TemplateController;
 use App\Http\Controllers\Product\ReviewController;
 use App\Http\Controllers\Product\VersionController;
-use App\Http\Controllers\Product\PaymentController;
+// use App\Http\Controllers\Product\PaymentController;
 
 
 // Public routes
@@ -37,11 +37,11 @@ Route::prefix('blogs')->group(function () {
     Route::get('/{slug}/related', [BlogController::class, 'getRelatedBlogs']);  // Fetch related blogs
 });
 
-Route::prefix('templates')->group(function () {
-    Route::get('/', [TemplateController::class, 'index']);  // Fetch all blogs
-    Route::get('/{slug}', [TemplateController::class, 'show']);  // Fetch a single blog by slug
-    Route::get('/{slug}/related', [TemplateController::class, 'getRelatedBlogs']);  // Fetch related blogs
-});
+// Route::prefix('templates')->group(function () {
+//     Route::get('/', [TemplateController::class, 'index']);  // Fetch all blogs
+//     Route::get('/{slug}', [TemplateController::class, 'show']);  // Fetch a single blog by slug
+//     Route::get('/{slug}/related', [TemplateController::class, 'getRelatedBlogs']);  // Fetch related blogs
+// });
 
 
 Route::prefix('reviews')->group(function () {
@@ -80,28 +80,28 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/{slug}', [BlogController::class, 'destroy']); // Delete a blog by slug
     });
 
-    Route::prefix('templates')->group(function () {
-        Route::post('/', [TemplateController::class, 'store']);          // Create a new blog
-        Route::put('/{slug}', [TemplateController::class, 'update']);    // Update a blog by slug
-        Route::delete('/{slug}', [TemplateController::class, 'destroy']); // Delete a blog by slug
-    });
-
-    
+    // Route::prefix('templates')->group(function () {
+    //     Route::post('/', [TemplateController::class, 'store']);          // Create a new blog
+    //     Route::put('/{slug}', [TemplateController::class, 'update']);    // Update a blog by slug
+    //     Route::delete('/{slug}', [TemplateController::class, 'destroy']); // Delete a blog by slug
+    // });
 
 
-    
+
+
+
     Route::prefix('reviews')->group(function () {
         Route::delete('/{id}', [ReviewController::class, 'destroy']);
     });
 
-  
-   
+
+
 
     Route::post('/templates/{templateId}/versions', [VersionController::class, 'store']);
     Route::put('/templates/{templateId}/versions/{versionId}', [VersionController::class, 'update']);
     Route::delete('/templates/{templateId}/versions/{versionId}', [VersionController::class, 'destroy']);
 
-  
+
 
 
 });
@@ -110,16 +110,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
 
-Route::post('/initialize-payment', [PaymentController::class, 'initializePayment']);
-
-// Route::get('/paystack/callback', [PaymentController::class, 'verifyPayment'])->name('paystack.callback');
-
-Route::post('/free-download', [PaymentController::class, 'freeDownload']);
+// Route::post('/initialize-payment', [PaymentController::class, 'initializePayment']);
 
 
-Route::post('/upload-template', [PaymentController::class, 'uploadTemplate']);
+// Route::post('/free-download', [PaymentController::class, 'freeDownload']);
 
 
-
-
-// Route::get('/download/{template}', [PaymentController::class, 'downloadTemplate'])->name('download.template');
+// // Route::post('/upload-template', [PaymentController::class, 'uploadTemplate']);
