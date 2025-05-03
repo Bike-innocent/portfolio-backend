@@ -11,11 +11,14 @@ RUN a2enmod rewrite
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Set working directory
+    # Set working directory
 WORKDIR /var/www/html
 
 # Copy project files
 COPY . .
+
+# Install Laravel dependencies
+RUN composer install --no-dev --optimize-autoloader
 
 # Change DocumentRoot to Laravel's public directory
 RUN sed -i 's|/var/www/html|/var/www/html/public|g' /etc/apache2/sites-available/000-default.conf
@@ -24,8 +27,11 @@ RUN sed -i 's|/var/www/html|/var/www/html/public|g' /etc/apache2/sites-available
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html/storage
 
-    RUN touch /var/www/html/database/database.sqlite \
+RUN touch /var/www/html/database/database.sqlite \
     && chown -R www-data:www-data /var/www/html/database/database.sqlite
+
+
+    RUN cp .env.example .env && php artisan key:generate
 
 
 # Expose port 80
