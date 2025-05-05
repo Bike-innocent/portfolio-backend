@@ -37,5 +37,8 @@ RUN cp .env.example .env && php artisan key:generate
 # Expose port
 EXPOSE 80
 
-# Run config cache and migrate on container start
-CMD php artisan config:clear && php artisan config:cache && php artisan migrate --force && apache2-foreground
+CMD php artisan config:clear \
+    && php artisan key:generate \
+    && php artisan config:cache \
+    && php artisan migrate --force \
+    && apache2-foreground
