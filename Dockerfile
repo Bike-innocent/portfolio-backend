@@ -1,9 +1,9 @@
 FROM php:8.2-apache
 
-# Install system dependencies and PHP extensions (including zip)
+# Install system dependencies and PHP extensions
 RUN apt-get update && apt-get install -y \
-    git curl zip unzip libpng-dev libonig-dev libxml2-dev sqlite3 libsqlite3-dev libzip-dev \
-    && docker-php-ext-install pdo pdo_mysql pdo_sqlite mbstring exif pcntl bcmath gd zip
+    git curl zip unzip libpng-dev libonig-dev libxml2-dev libzip-dev \
+    && docker-php-ext-install pdo pdo_mysql mbstring exif pcntl bcmath gd zip
 
 # Enable Apache mod_rewrite
 RUN a2enmod rewrite
@@ -17,6 +17,10 @@ WORKDIR /var/www/html
 # Copy project files
 COPY . .
 
+# Set environment to debug mode to see 500 errors
+ENV APP_ENV=local
+ENV APP_DEBUG=true
+
 # Install Laravel dependencies
 RUN composer install --no-dev --optimize-autoloader
 
@@ -25,17 +29,13 @@ RUN sed -i 's|/var/www/html|/var/www/html/public|g' /etc/apache2/sites-available
 
 # Set permissions
 RUN chown -R www-data:www-data /var/www/html \
-    && chmod -R 755 /var/www/html/storage
+    && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
-# Create SQLite file (if needed)
-RUN touch /var/www/html/database/database.sqlite \
-    && chown -R www-data:www-data /var/www/html/database/database.sqlite
-
-# Copy .env and generate app key
+# Copy .env file and generate key
 RUN cp .env.example .env && php artisan key:generate
 
-# Expose port 80
+# Expose port
 EXPOSE 80
 
-# Start Apache
-CMD ["apache2-foreground"]
+# Run config cache and migrate on container start
+CMD php artisan config:clear && php artisan config:cache && php artisan migrate --force && apache2-foreground
