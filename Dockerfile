@@ -1,3 +1,4 @@
+# Use official PHP image with Apache
 FROM php:8.2-apache
 
 # Install system dependencies and PHP extensions
@@ -8,7 +9,7 @@ RUN apt-get update && apt-get install -y \
 # Enable Apache mod_rewrite
 RUN a2enmod rewrite
 
-# Suppress "ServerName" warning
+# Suppress Apache "ServerName" warning
 RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
 
 # Install Composer
@@ -17,10 +18,13 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Set working directory
 WORKDIR /var/www/html
 
-# Copy project files
+# Copy project files to container
 COPY . .
 
-# Override Apache default vhost to point to Laravel public folder
+# Install Laravel dependencies
+RUN composer install --no-dev --optimize-autoloader
+
+# Set Laravel public directory as Apache DocumentRoot
 RUN echo '<VirtualHost *:80>\n\
     ServerName localhost\n\
     DocumentRoot /var/www/html/public\n\
@@ -32,14 +36,14 @@ RUN echo '<VirtualHost *:80>\n\
     CustomLog ${APACHE_LOG_DIR}/access.log combined\n\
 </VirtualHost>' > /etc/apache2/sites-available/000-default.conf
 
-# Set permissions for Laravel directories
+# Set permissions for Laravel
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
-# Expose port 80
+# Expose Apache HTTP port
 EXPOSE 80
 
-# Start Apache and Laravel setup
+# Run Laravel setup and start Apache
 CMD php artisan config:clear \
     && php artisan config:cache \
     && php artisan migrate --force || echo "Migration skipped (maybe DB not ready)" \
