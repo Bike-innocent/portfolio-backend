@@ -44,5 +44,4 @@ CMD chown -R www-data:www-data /var/www/html \
     && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache \
     && php artisan config:clear \
     && php artisan config:cache \
-    && php artisan migrate --force || echo "Migration skipped (maybe DB not ready)" \
     && apache2-foreground
