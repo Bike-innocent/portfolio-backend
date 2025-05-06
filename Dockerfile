@@ -6,6 +6,8 @@ RUN apt-get update && apt-get install -y \
     git curl zip unzip libpng-dev libonig-dev libxml2-dev libzip-dev \
     && docker-php-ext-install pdo pdo_mysql mbstring exif pcntl bcmath gd zip
 
+
+  
 # Enable Apache mod_rewrite
 RUN a2enmod rewrite
 
@@ -36,15 +38,11 @@ RUN echo '<VirtualHost *:80>\n\
     CustomLog ${APACHE_LOG_DIR}/access.log combined\n\
 </VirtualHost>' > /etc/apache2/sites-available/000-default.conf
 
-# Set permissions for Laravel
-RUN chown -R www-data:www-data /var/www/html \
-    && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
-
 # Expose Apache HTTP port
 EXPOSE 80
-
-# Run Laravel setup and start Apache
-CMD php artisan config:clear \
+CMD chown -R www-data:www-data /var/www/html \
+    && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache \
+    && php artisan config:clear \
     && php artisan config:cache \
     && php artisan migrate --force || echo "Migration skipped (maybe DB not ready)" \
     && apache2-foreground
