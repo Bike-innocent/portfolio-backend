@@ -24,10 +24,8 @@ RUN chown -R www-data:www-data /var/www/html \
 # Expose port
 EXPOSE 80
 
-# Start Apache and Laravel commands
+# Start Apache and Laravel setup
 CMD php artisan config:clear \
-    && if [ ! -f .env ]; then cp .env.example .env; fi \
-    && if ! grep -q "APP_KEY=" .env || grep -q "APP_KEY=" .env | grep -q 'APP_KEY=$'; then php artisan key:generate; fi \
     && php artisan config:cache \
     && php artisan migrate --force || echo "Migration skipped (maybe DB not ready)" \
     && apache2-foreground
