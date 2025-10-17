@@ -68,7 +68,7 @@ class ContactController extends Controller
         Mail::raw(
             'You have received a new message from ' . $validated['email'] . ' with the message: ' . $validated['message'],
             function ($mail) use ($validated) {
-                $mail->to(['hello@chibuikeinnocent.tech', 'onyemaobichibuikeinnocent.com@gmail.com'])
+                $mail->to(['hello@chibuikeinnocent.dev', 'onyemaobichibuikeinnocent.com@gmail.com'])
                     ->subject('New Contact Message');
             }
         );
